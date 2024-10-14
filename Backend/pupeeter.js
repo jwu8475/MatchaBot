@@ -1,5 +1,8 @@
 import puppeteer from "puppeteer";
 import { connect } from 'puppeteer-real-browser'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const { page, browser } = await connect({})
 
@@ -19,8 +22,8 @@ const email = await page.$("#username");
 const password = await page.$("#password");
 
 // enter email and password
-await email.type("jwu8475@gmail.com");
-await password.type("Wilson123123123!");
+await email.type(process.env.USER_ID);
+await password.type(process.env.USER_PASSWORD);
 
 // wait for 1 second
 // await new Promise(resolve => setTimeout(resolve, 1000));
@@ -79,7 +82,6 @@ async function checkStock() {
         })
     }
 
-    console.log(selections)
     // add to cart?
     if (selections[selections.length - 1].status === "In stock") {
         clearInterval(intervalId)
@@ -90,8 +92,6 @@ async function checkStock() {
 
         // checkout
         await page.goto(`https://www.marukyu-koyamaen.co.jp/english/shop/cart/checkout/${usdCurrency}`, { waitUntil: 'networkidle2'}); 
-        
-        // await new Promise(resolve => setTimeout(resolve, 3000));
 
         // verify
         const confirmProduct = await page.$("span[class='product-name-wrap']")
@@ -102,13 +102,15 @@ async function checkStock() {
         // "Karigane Kaori - 150g bag"
         console.log(productName === `${"Karigane Kaori"} - ${selections[selections.length - 1].gram}`)
         console.log(quant === "1")
+        
+        // repeat until task is performed
         if (productName === `${"Karigane Kaori"} - ${selections[selections.length - 1].gram}` && quant === "1") {
             // agree to terms
             const agree = await page.$("input[id='terms']")
             await agree.click()
             // type bot checking text
-            const captchaImg = await page.$("img[alt='captcha']")
-            console.log(await captchaImg.evaluate(el => el.src))
+            const captchaTag = await page.$("img[alt='captcha']")
+            const captchaImg = await captchaTag.evaluate(el => el.src)
 
             // click place order
             const placeOrder = await page.$("button[id='place_order']")
@@ -125,70 +127,6 @@ function startInterval(seconds, cb) {
     return setInterval(cb, seconds * 1000)
 }
 let intervalId = startInterval(30, checkStock)
-// let intervalId = setInterval(async () => {
-    // // clear out selections
-    // selections.length = 0
-    // console.log("interval")
-    // for (let i = 0; i < selectionItems.length; i++) {
-    //     // format data
-    //     let gram = await selectionItems[i].evaluate(el => el.textContent.slice(4))
-    //     let status = await availability[i].evaluate(el => el.textContent)
-    //     let available = ''
-    //     if (status.slice(0, 12) === 'Out of stock') {
-    //         available = status.slice(0, 12)
-    //     } else {
-    //         available = "In stock"
-    //     }
-    //     console.log("pushing")
-    //     // add to selections
-    //     selections.push({
-    //         gram: gram,
-    //         status: available,
-    //         addCart: async function () {
-    //             await availability[i].click()
-    //         }
-    //     })
-    // }
-
-    // console.log(selections)
-    // // add to cart?
-    // if (selections[selections.length - 1].status === "In stock") {
-    //     clearInterval(intervalId)
-    //     await selections[selections.length - 1].addCart() 
-    //     console.log("added to cart successfully")
-
-    //     // checkout
-    //     await page.goto(`https://www.marukyu-koyamaen.co.jp/english/shop/cart/checkout/${usdCurrency}`); 
-        
-    //     // await new Promise(resolve => setTimeout(resolve, 3000));
-
-    //     // verify
-    //     const confirmProduct = await page.$("span[class='product-name-wrap']")
-    //     const confirmQuantity = await page.$("strong[class='product-quantity']")
-    //     const productName = await confirmProduct.evaluate(el => el.textContent)
-    //     const quant = await confirmQuantity.evaluate(el => el.textContent.slice(2))
-        
-    //     // "Karigane Kaori - 150g bag"
-    //     console.log(productName === `${"Karigane Kaori"} - ${selections[selections.length - 1].gram}`)
-    //     console.log(quant === "1")
-    //     if (productName === `${"Karigane Kaori"} - ${selections[selections.length - 1].gram}` && quant === "1") {
-    //         // agree to terms
-    //         const agree = await page.$("input[id='terms']")
-    //         await agree.click()
-    //         // type bot checking text
-    //         const captchaImg = await page.$$("img[alt='captcha']")
-    //         console.log(captchaImg)
-
-    //         // click place order
-    //         const placeOrder = await page.$("button[id='place_order']")
-    //         await placeOrder.click()
-    //     }
-    //     return
-    // } else {
-    //     console.log("not in stock")
-    // }
-
-// }, 30000)
 
 
 // setTimeout(async () => {
