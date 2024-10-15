@@ -9,6 +9,9 @@ const { page, browser } = await connect({})
 // set browser to full screen dynamically
 await page.setViewport({ width: 0, height: 0 });
 
+// disable timeout
+await page.setDefaultTimeout(0)
+
 // all products
 //https://www.marukyu-koyamaen.co.jp/english/shop/products/?viewall=1
 
